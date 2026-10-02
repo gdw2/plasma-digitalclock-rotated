@@ -1,0 +1,86 @@
+diff --git a/applets/digital-clock/DigitalClock.qml b/applets/digital-clock/DigitalClock.qml
+index 4f2c778..d0dc5f1 100644
+--- a/applets/digital-clock/DigitalClock.qml
++++ b/applets/digital-clock/DigitalClock.qml
+@@ -255,39 +255,55 @@ MouseArea {
+             PropertyChanges {
+                 main.Layout.fillHeight: false
+                 main.Layout.fillWidth: true
+-                main.Layout.maximumHeight: contentItem.height
++                // The content is rotated, so its unrotated width becomes the
++                // space we occupy along the panel.
++                main.Layout.maximumHeight: contentItem.width
+                 main.Layout.minimumHeight: main.Layout.maximumHeight
+ 
+-                contentItem.height: contentItem.Plasmoid.configuration.showDate ? labelsGrid.height + dateLabel.contentHeight : labelsGrid.height
+-                contentItem.width: main.width
++                // Lay the clock out exactly like the horizontal panel (time on
++                // one line, date on the line below) and then rotate the whole
++                // thing 90°, so both lines become columns running along the
++                // vertical panel. Positive rotation is clockwise; default to
++                // bottom-to-top (counter-clockwise) for left-edge panels.
++                contentItem.rotation: Plasmoid.location === PlasmaCore.Types.RightEdge ? 90 : -90
++                contentItem.height: timeLabel.height + (dateLabel.visible || timeZoneLabel.visible ? 0.8 * timeLabel.height : 0)
++                contentItem.width: Math.max(timeLabel.width + (dateLabel.visible ? timeZoneLabel.contentWidth : 0),
++                                            timeZoneLabel.contentWidth, dateLabel.contentWidth) + Kirigami.Units.largeSpacing
+ 
+-                labelsGrid.rows: 2
++                labelsGrid.rows: dateLabel.visible ? 1 : 2
+ 
+-                timeLabel.height: sizehelper.contentHeight
+-                timeLabel.width: main.width
+-                timeLabel.font.pixelSize: Math.min(timeLabel.height, fontHelper.font.pixelSize)
+-                timeLabel.fontSizeMode: Text.Fit
++                timeLabel.height: sizehelper.height
++                timeLabel.width: sizehelper.contentWidth
++                timeLabel.font.pixelSize: timeLabel.height
+ 
+-                timeZoneLabel.height: Math.max(0.7 * timeLabel.height, dateLabel.minimumPixelSize)
+-                timeZoneLabel.width: main.width
+-                timeZoneLabel.fontSizeMode: Text.Fit
+-                timeZoneLabel.minimumPixelSize: dateLabel.minimumPixelSize
+-                timeZoneLabel.elide: Text.ElideRight
++                timeZoneLabel.height: dateLabel.visible ? 0.7 * timeLabel.height : 0.8 * timeLabel.height
++                timeZoneLabel.width: dateLabel.visible ? timeZoneLabel.contentWidth : timeLabel.width
++                timeZoneLabel.font.pixelSize: timeZoneLabel.height
+ 
+-                dateLabel.width: main.width
+-                //NOTE: in order for Text.Fit to work as intended, the actual height needs to be quite big, in order for the font to enlarge as much it needs for the available width, and then request a sensible height, for which contentHeight will need to be considered as opposed to height
+-                dateLabel.height: Kirigami.Units.gridUnit * 10
+-                dateLabel.fontSizeMode: Text.Fit
+-                dateLabel.verticalAlignment: Text.AlignTop
+-                // Those magic numbers are purely what looks nice as maximum size, here we have it the smallest
+-                // between slightly bigger than the default font (1.4 times) and a bit smaller than the time font
+-                dateLabel.font.pixelSize: Math.min(0.7 * timeLabel.height, contentItem.Kirigami.Theme.defaultFont.pixelSize * 1.4)
+-                dateLabel.elide: Text.ElideRight
+-                dateLabel.wrapMode: Text.WordWrap
++                dateLabel.height: 0.8 * timeLabel.height
++                dateLabel.width: dateLabel.contentWidth
++                dateLabel.verticalAlignment: Text.AlignVCenter
++                dateLabel.font.pixelSize: dateLabel.height
+ 
+-                sizehelper.width: main.width
+-                sizehelper.fontSizeMode: Text.HorizontalFit
+-                sizehelper.font.pixelSize: fontHelper.font.pixelSize
++                // The panel thickness (main.width) is what the rotated text
++                // has to fit across; leave headroom for the two stacked lines
++                // plus font ascent/descent so nothing spills out of the panel.
++                sizehelper.height: Math.min(dateLabel.visible || timeZoneLabel.visible ? main.width * 0.5 : main.width * 0.65,
++                                            fontHelper.font.pixelSize)
++                sizehelper.font.pixelSize: sizehelper.height
++            }
++
++            AnchorChanges {
++                target: contentItem
++
++                anchors.horizontalCenter: main.horizontalCenter
++                anchors.verticalCenter: main.verticalCenter
++            }
++
++            AnchorChanges {
++                target: labelsGrid
++
++                anchors.horizontalCenter: contentItem.horizontalCenter
+             }
+ 
+             AnchorChanges {
