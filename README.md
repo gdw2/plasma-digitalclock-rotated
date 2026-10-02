@@ -79,6 +79,18 @@ enough to carry as a distro patch; see
 [`patches/digital-clock-vertical-rotate.patch`](patches/digital-clock-vertical-rotate.patch).
 Upstream tracking bug: [KDE bug 440096](https://bugs.kde.org/show_bug.cgi?id=440096).
 
+## Publishing to the widget directory
+
+The package is built to [KDE Store](https://store.kde.org/browse?cat=113) /
+**Get New Widgets** conventions:
+
+- `metadata.json` declares `"KPackageStructure": "Plasma/Applet"` and a unique
+  `KPlugin.Id`.
+- `package.sh` produces a `.plasmoid` archive containing `metadata.json` and
+  `contents/` at the archive root — the file you upload to the store.
+- The store listing also wants a screenshot, a description, and a license. Use
+  the text in this README and a PNG of the widget in a real vertical panel.
+
 ## License
 
 GPL-2.0-or-later. See [LICENSE](LICENSE). The QML is derived from the KDE Plasma
